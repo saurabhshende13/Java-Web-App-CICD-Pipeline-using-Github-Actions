@@ -29,7 +29,7 @@
 </head>
 <body>
   <div class="welcome-box">
-    <h1>Welcome to MyWebApp Deployed using Github Actions</h1>
+    <h1>Welcome to MyWebApp Deployed using Github Actions 2</h1>
     <p>This is a simple JSP-based web application.</p>
   </div>
 </body>
