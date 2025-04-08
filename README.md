@@ -14,7 +14,7 @@ This project demonstrates how to build a complete CI/CD pipeline using **GitHub 
 - Maven
 - Java 11/17
 - Ubuntu Server
-- Notifications via Email/Slack (Optional)
+- Notifications via Email (Optional)
 
 ---
 
