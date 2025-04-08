@@ -125,8 +125,6 @@ Add the following:
 - File: `.github/workflows/cicd.yml`
 - Define CI/CD pipeline: Checkout > Build > SonarQube > Nexus Upload > Tomcat Deploy > Notify (Optional)
 ```yaml
-
-
 name: Build and Deploy Java App to Tomcat on AWS EC2
 
 on:
@@ -188,6 +186,27 @@ jobs:
         curl -v -u ${{ secrets.TOMCAT_USER }}:${{ secrets.TOMCAT_PASSWORD }} \
         -T MyWebApp/target/MyWebApp.war \
         "http://${{ secrets.TOMCAT_HOST }}/manager/text/deploy?path=/MyWebApp&update=true"
+
+    # Send Email Notification
+    - name: Send Email Notification
+      if: always()
+      uses: dawidd6/action-send-mail@v3
+      with:
+        server_address: smtp.gmail.com
+        server_port: 587
+        username: ${{ secrets.EMAIL_USERNAME }}
+        password: ${{ secrets.EMAIL_PASSWORD }}
+        subject: "GitHub Actions - Build ${{ job.status }}: MyWebApp"
+        to: ${{ secrets.EMAIL_TO }}
+        from: GitHub Actions <${{ secrets.EMAIL_USERNAME }}>
+        body: |
+          Build Status: ${{ job.status }}
+          Repo: ${{ github.repository }}
+          Branch: ${{ github.ref }}
+          Commit: ${{ github.sha }}
+          Triggered by: ${{ github.actor }}
+          Workflow: ${{ github.workflow }}
+          Logs: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
 ```
 
 ![step5](steps/step5a.png)
@@ -198,18 +217,26 @@ Notify stage :
 
 ### 📧 Email Notification Example
 ```yaml
-- name: Send Email
-  if: failure()
-  uses: dawidd6/action-send-mail@v3
-  with:
-    server_address: smtp.gmail.com
-    server_port: 587
-    username: your-email@gmail.com
-    password: ${{ secrets.EMAIL_PASSWORD }}
-    subject: GitHub Actions Build Failed
-    to: ${{ secrets.EMAIL_TO }}
-    from: GitHub CI/CD
-    body: "Build failed for MyWebApp. Please check logs."
+    # Send Email Notification
+    - name: Send Email Notification
+      if: always()
+      uses: dawidd6/action-send-mail@v3
+      with:
+        server_address: smtp.gmail.com
+        server_port: 587
+        username: ${{ secrets.EMAIL_USERNAME }}
+        password: ${{ secrets.EMAIL_PASSWORD }}
+        subject: "GitHub Actions - Build ${{ job.status }}: MyWebApp"
+        to: ${{ secrets.EMAIL_TO }}
+        from: GitHub Actions <${{ secrets.EMAIL_USERNAME }}>
+        body: |
+          Build Status: ${{ job.status }}
+          Repo: ${{ github.repository }}
+          Branch: ${{ github.ref }}
+          Commit: ${{ github.sha }}
+          Triggered by: ${{ github.actor }}
+          Workflow: ${{ github.workflow }}
+          Logs: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
 ```
 
 ---
