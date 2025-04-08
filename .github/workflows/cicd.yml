@@ -59,3 +59,28 @@ jobs:
         curl -v -u ${{ secrets.TOMCAT_USER }}:${{ secrets.TOMCAT_PASSWORD }} \
         -T MyWebApp/target/MyWebApp.war \
         "http://${{ secrets.TOMCAT_HOST }}/manager/text/deploy?path=/MyWebApp&update=true"
+
+    # Send Email Notification
+    - name: Send Email Notification
+      if: always()
+      uses: dawidd6/action-send-mail@v3
+      with:
+        server_address: smtp.gmail.com
+        server_port: 587
+        username: ${{ secrets.EMAIL_USERNAME }}
+        password: ${{ secrets.EMAIL_PASSWORD }}
+        subject: "GitHub Actions - Build ${{ job.status }}: MyWebApp"
+        to: ${{ secrets.EMAIL_TO }}
+        from: GitHub Actions <${{ secrets.EMAIL_USERNAME }}>
+        content_type: text/html
+        body: |
+          <h2>🚀 GitHub Actions Build Notification</h2>
+          <p><strong>Status:</strong> <span style="color:${{ job.status == 'success' && '#28a745' || '#d73a49' }};">${{ job.status }}</span></p>
+          <ul>
+            <li><strong>Repository:</strong> ${{ github.repository }}</li>
+            <li><strong>Branch:</strong> ${{ github.ref }}</li>
+            <li><strong>Commit:</strong> ${{ github.sha }}</li>
+            <li><strong>Triggered by:</strong> ${{ github.actor }}</li>
+            <li><strong>Workflow:</strong> ${{ github.workflow }}</li>
+          </ul>
+          <p>🔗 <a href="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}">View Build Logs</a></p>
