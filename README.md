@@ -124,6 +124,71 @@ Add the following:
 
 - File: `.github/workflows/cicd.yml`
 - Define CI/CD pipeline: Checkout > Build > SonarQube > Nexus Upload > Tomcat Deploy > Notify (Optional)
+```yaml
+
+
+name: Build and Deploy Java App to Tomcat on AWS EC2
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up JDK 11
+      uses: actions/setup-java@v2
+      with:
+        distribution: 'adopt'
+        java-version: '11'
+
+    # SonarQube Analysis
+    - name: SonarQube Scan
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      run: |
+        mvn sonar:sonar -f MyWebApp/pom.xml \
+          -Dsonar.projectKey=MyWebApp \
+          -Dsonar.host.url=${{ secrets.SONARQUBE_URL }} \
+          -Dsonar.login=$SONAR_TOKEN
+
+    # Configure Maven settings.xml for Nexus
+    - name: Configure Maven settings.xml for Nexus
+      env:
+        NEXUS_USERNAME: ${{ secrets.NEXUS_USER }}
+        NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+      run: |
+        mkdir -p ~/.m2
+        echo '<?xml version="1.0" encoding="UTF-8"?>' > ~/.m2/settings.xml
+        echo '<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"' >> ~/.m2/settings.xml
+        echo '         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"' >> ~/.m2/settings.xml
+        echo '         xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">' >> ~/.m2/settings.xml
+        echo '  <servers>' >> ~/.m2/settings.xml
+        echo '    <server>' >> ~/.m2/settings.xml
+        echo "      <id>nexus</id>" >> ~/.m2/settings.xml
+        echo "      <username>${NEXUS_USERNAME}</username>" >> ~/.m2/settings.xml
+        echo "      <password>${NEXUS_PASSWORD}</password>" >> ~/.m2/settings.xml
+        echo '    </server>' >> ~/.m2/settings.xml
+        echo '  </servers>' >> ~/.m2/settings.xml
+        echo '</settings>' >> ~/.m2/settings.xml
+
+    # Build and Deploy to Nexus
+    - name: Build and Deploy to Nexus
+      run: |
+        mvn clean deploy -f MyWebApp/pom.xml
+
+    # Deploy to Tomcat on EC2
+    - name: Deploy to Tomcat
+      run: |
+        curl -v -u ${{ secrets.TOMCAT_USER }}:${{ secrets.TOMCAT_PASSWORD }} \
+        -T MyWebApp/target/MyWebApp.war \
+        "http://${{ secrets.TOMCAT_HOST }}/manager/text/deploy?path=/MyWebApp&update=true"
+```
 
 ![step5](steps/step5a.png)
 ![step5](steps/step5b.png)
