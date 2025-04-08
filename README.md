@@ -1,6 +1,6 @@
 # Java WebApp CI/CD Pipeline using GitHub Actions, SonarQube, Nexus & Tomcat
 
-![architechture](steps/project.png)
+![architechture](project.png)
 
 This project demonstrates how to build a complete CI/CD pipeline using **GitHub Actions** to deploy a Java web application to **Apache Tomcat** on an EC2 server. The pipeline also integrates with **SonarQube** for code quality analysis, **Nexus Repository** for artifact storage, and includes optional **notifications** via email or Slack.
 
