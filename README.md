@@ -257,7 +257,7 @@ Access your deployed app using:
 ```
 http://<TOMCAT_HOST>:8080/MyWebApp
 ```
-![step6](steps/step6d.png)
+![step6](steps/stepd.png)
 
 ---
 
